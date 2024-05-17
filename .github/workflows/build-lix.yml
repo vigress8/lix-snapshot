@@ -1,0 +1,28 @@
+name: Build Lix
+on:
+  workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Nix
+        uses: cachix/install-nix-action@v26
+      - name: Clone Lix
+        uses: actions/checkout@v4
+        with:
+          name: lix-project/lix
+          ref: main
+      - name: Build Lix
+        run: |
+          set -e
+          nix build --verbose
+          result=$(readlink -f ./result)
+          tempBinCache=$(mktemp -d nixCache.XXXXXX)
+          nix copy --no-check-sigs --to file://$tempBinCache $result
+          tar --create --preserve-permissions --file=lix.tar $tempBinCache
+          echo tarball="$PWD/lix.tar" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v4
+        with:
+          path: ${{ env.tarball }}
+          if-no-files-found: error
