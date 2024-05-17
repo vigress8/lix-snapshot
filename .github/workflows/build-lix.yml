@@ -1,6 +1,8 @@
 name: Build Lix
 on:
-  workflow_dispatch
+  schedule:
+    - cron: 0 0 * * 7
+  workflow_dispatch:
 
 jobs:
   build:
@@ -8,20 +10,22 @@ jobs:
     steps:
       - name: Install Nix
         uses: cachix/install-nix-action@v26
+      - name: Cache the build
+        uses: DeterminateSystems/magic-nix-cache-action@v6
       - name: Clone Lix
         uses: actions/checkout@v4
         with:
-          name: lix-project/lix
+          repository: lix-project/lix
           ref: main
-      - name: Build Lix
+      - name: Build Lix (x86_64)
         run: |
-          set -e
-          nix build --verbose
+          set -x
+          nix build --verbose .#packages.x86_64-linux.default
           result=$(readlink -f ./result)
           tempBinCache=$(mktemp -d nixCache.XXXXXX)
           nix copy --no-check-sigs --to file://$tempBinCache $result
-          tar --create --preserve-permissions --file=lix.tar $tempBinCache
-          echo tarball="$PWD/lix.tar" >> $GITHUB_ENV
+          tar --create --preserve-permissions --file=lix-x86_64.tar $tempBinCache
+          echo tarball="$PWD/lix-x86_64.tar" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         with:
           path: ${{ env.tarball }}
