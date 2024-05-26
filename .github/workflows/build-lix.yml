@@ -22,7 +22,7 @@ jobs:
           set -x
           nix build --verbose .#packages.x86_64-linux.default
           result=$(readlink -f ./result)
-          tempBinCache=$(mktemp -d nixCache.XXXXXX)
+          tempBinCache=$(mktemp -d ${TMPDIR:?}/nixCache.XXXXXX)
           nix copy --no-check-sigs --to file://$tempBinCache $result
           tar --create --preserve-permissions --file=lix-x86_64.tar $tempBinCache
           echo tarball="$PWD/lix-x86_64.tar" >> $GITHUB_ENV
