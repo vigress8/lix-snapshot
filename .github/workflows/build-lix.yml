@@ -22,9 +22,11 @@ jobs:
           set -x
           nix build --verbose .#packages.x86_64-linux.default
           result=$(readlink -f ./result)
-          tempBinCache=$(mktemp -d ${TMPDIR:?}/nixCache.XXXXXX)
-          nix copy --no-check-sigs --to file://$tempBinCache $result
-          tar --create --preserve-permissions --file=lix-x86_64.tar $tempBinCache
+          cd "${TMPDIR:?}"
+          tempBinCache=$(mktemp -d nixCache.XXXXXX)
+          echo "$result" > "$tempBinCache/.lix-path"
+          nix copy --no-check-sigs --to "file://$PWD/$tempBinCache" "$result"
+          tar --create --preserve-permissions --file=lix-x86_64.tar "$tempBinCache"
           echo tarball="$PWD/lix-x86_64.tar" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         with:
