@@ -27,8 +27,21 @@ jobs:
           echo "$result" > "$tempBinCache/.lix-path"
           nix copy --no-check-sigs --to "file://$PWD/$tempBinCache" "$result"
           tar --create --preserve-permissions --file=lix-x86_64.tar "$tempBinCache"
-          echo tarball="$PWD/lix-x86_64.tar" >> $GITHUB_ENV
+          echo tarball_x86_64="$PWD/lix-x86_64.tar" >> $GITHUB_ENV
+      - name: Build Lix (aarch64)
+        run: |
+          set -x
+          nix build --verbose .#packages.aarch64-linux.default
+          result=$(readlink -f ./result)
+          cd "${TMPDIR:?}"
+          tempBinCache=$(mktemp -d nixCache.XXXXXX)
+          echo "$result" > "$tempBinCache/.lix-path"
+          nix copy --no-check-sigs --to "file://$PWD/$tempBinCache" "$result"
+          tar --create --preserve-permissions --file=lix-aarch64.tar "$tempBinCache"
+          echo tarball_aarch64="$PWD/lix-aarch64.tar" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         with:
-          path: ${{ env.tarball }}
+          path: |
+            ${{ env.tarball_x86_64 }}
+            ${{ env.tarball_aarch64 }}
           if-no-files-found: error
