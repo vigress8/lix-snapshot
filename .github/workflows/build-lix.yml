@@ -20,28 +20,30 @@ jobs:
       - name: Build Lix (x86_64)
         run: |
           set -x
-          nix build --verbose .#packages.x86_64-linux.default
-          result=$(readlink -f ./result)
+          cross_build() {
+            nix-build --verbose \
+              --argstr target "$1" \
+              --expr '(import (builtins.getFlake (toString ./.)).inputs.nixpkgs {
+                        crossSystem.config = target;
+                      }).callPackage ./package.nix {}'
+          }
+
+          declare -A result
+          result[x86_64-linux]=$(nix-build --verbose --attr packages.x86_64-linux.default)
+          result[aarch64-linux]=$(cross_build aarch64-unknown-linux-gnu)
+
           cd "${TMPDIR:?}"
           tempBinCache=$(mktemp -d nixCache.XXXXXX)
-          echo "$result" > "$tempBinCache/.lix-path"
-          nix copy --no-check-sigs --to "file://$PWD/$tempBinCache" "$result"
-          tar --create --preserve-permissions --file=lix-x86_64.tar "$tempBinCache"
-          echo tarball_x86_64="$PWD/lix-x86_64.tar" >> $GITHUB_ENV
-      - name: Build Lix (aarch64)
-        run: |
-          set -x
-          nix build --verbose .#packages.aarch64-linux.default
-          result=$(readlink -f ./result)
-          cd "${TMPDIR:?}"
-          tempBinCache=$(mktemp -d nixCache.XXXXXX)
-          echo "$result" > "$tempBinCache/.lix-path"
-          nix copy --no-check-sigs --to "file://$PWD/$tempBinCache" "$result"
-          tar --create --preserve-permissions --file=lix-aarch64.tar "$tempBinCache"
-          echo tarball_aarch64="$PWD/lix-aarch64.tar" >> $GITHUB_ENV
+          for target in "${!result[@]}"; do
+            path=${result[$target]}
+            printf '%s = %s\n' "$target" "$path" >> "$tempBinCache/.lix-paths"
+            nix copy --no-check-sigs --to "file://$PWD/$tempBinCache" "$path"
+          done
+
+          tar --create --preserve-permissions --file=lix.tar "$tempBinCache"
+          echo TARBALL="$PWD/lix.tar" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         with:
           path: |
-            ${{ env.tarball_x86_64 }}
-            ${{ env.tarball_aarch64 }}
+            ${{ env.TARBALL }}
           if-no-files-found: error
