@@ -22,9 +22,12 @@ jobs:
           set -x
           cross_build() {
             nix-build --verbose \
-              --expr '(import (builtins.getFlake (toString ./.)).inputs.nixpkgs {
+              --expr 'with import (builtins.getFlake (toString ./.)).inputs.nixpkgs {
                         crossSystem.config = "'$1'";
-                      }).callPackage ./package.nix {}'
+                      };
+                      callPackage ./package.nix {
+                        pegtl = callPackage ./misc/pegtl.nix {};
+                      }'
           }
 
           declare -A result
