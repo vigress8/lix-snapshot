@@ -21,7 +21,7 @@ jobs:
         run: |
           set -x
           cross_build() {
-            nix-build --verbose \
+            nix-build \
               --expr 'with import (builtins.getFlake (toString ./.)).inputs.nixpkgs {
                         crossSystem.config = "'$1'";
                       };
@@ -31,7 +31,7 @@ jobs:
           }
 
           declare -A result
-          result[x86_64-linux]=$(nix-build --verbose --attr packages.x86_64-linux.default)
+          result[x86_64-linux]=$(nix-build --attr packages.x86_64-linux.default)
           result[aarch64-linux]=$(cross_build aarch64-linux)
 
           cd "${TMPDIR:?}"
