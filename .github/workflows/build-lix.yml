@@ -22,9 +22,8 @@ jobs:
           set -x
           cross_build() {
             nix-build --verbose \
-              --argstr target "$1" \
-              --expr 'target: (import (builtins.getFlake (toString ./.)).inputs.nixpkgs {
-                        crossSystem.config = target;
+              --expr '(import (builtins.getFlake (toString ./.)).inputs.nixpkgs {
+                        crossSystem.config = "'$1'";
                       }).callPackage ./package.nix {}'
           }
 
