@@ -8,6 +8,7 @@ jobs:
     steps:
       - run: |
           git clone --mirror https://github.com/NixOS/nixpkgs.git
+          cd nixpkgs
           git bundle create nixpkgs.bundle --all
           echo BUNDLE="$PWD/nixpkgs.bundle" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
