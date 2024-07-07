@@ -1,0 +1,17 @@
+name: Bundle Nixpkgs
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          git clone --mirror https://github.com/NixOS/nixpkgs.git
+          git bundle create nixpkgs.bundle --all
+          echo BUNDLE="$PWD/nixpkgs.bundle" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v4
+        with:
+          path: |
+            ${{ env.BUNDLE }}
+          if-no-files-found: error
