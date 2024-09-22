@@ -21,10 +21,11 @@ jobs:
         run: |
           set -x
           cross_build() {
-            nix-build \
-              --expr '(import (builtins.getFlake (toString ./.)).inputs.nixpkgs {
-                        crossSystem.config = "'$1'";
-                      }).callPackage ./package.nix {}'
+            nix-build --expr \
+              'with import (builtins.getFlake (toString ./.)).inputs.nixpkgs {
+                 crossSystem.config = "'$1'";
+              };
+              callPackage ./package.nix { stdenv = clangStdenv; }'
           }
 
           declare -A result
