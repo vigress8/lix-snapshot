@@ -1,0 +1,33 @@
+From ed381cd58a55f65e6b1aa1c17bebe28b1add7a50 Mon Sep 17 00:00:00 2001
+From: Jade Lovelace <lix@jade.fyi>
+Date: Tue, 17 Sep 2024 20:43:21 -0700
+Subject: [PATCH] package.nix: fix cross for editline
+
+editline's dep on ncurses is a runtime one, so it should be in
+buildInputs, not nativeBuildInputs.
+
+CC: https://git.lix.systems/lix-project/lix/issues/527
+Change-Id: I631c192a55677b0cc77faa7511986f1fa2205e91
+---
+
+diff --git a/package.nix b/package.nix
+index 23ebc3a..d71037f 100644
+--- a/package.nix
++++ b/package.nix
+@@ -22,7 +22,6 @@
+   doxygen,
+   editline-lix ? __forDefaults.editline-lix,
+   editline,
+-  fetchpatch,
+   git,
+   gtest,
+   jq,
+@@ -100,7 +99,7 @@
+         (lib.enableFeature (ncurses != null) "termcap")
+       ];
+ 
+-      nativeBuildInputs = (prev.nativeBuildInputs or [ ]) ++ [ ncurses ];
++      buildInputs = (prev.buildInputs or [ ]) ++ [ ncurses ];
+     });
+ 
+     build-release-notes = callPackage ./maintainers/build-release-notes.nix { };
