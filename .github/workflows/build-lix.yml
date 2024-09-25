@@ -33,7 +33,7 @@ jobs:
 
           declare -A result
           result[x86_64-linux]=$(nix-build --attr packages.x86_64-linux.default)
-          result[aarch64-linux]=$(cross_build aarch64-linux)
+          # result[aarch64-linux]=$(cross_build aarch64-linux)
 
           cd "${TMPDIR:?}"
           tempBinCache=$(mktemp -d nixCache.XXXXXX)
