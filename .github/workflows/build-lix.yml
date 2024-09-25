@@ -17,7 +17,7 @@ jobs:
         with:
           repository: lix-project/lix
           ref: main
-      - name: Build Lix (x86_64)
+      - name: Build Lix
         run: |
           set -x
           cross_build() {
@@ -28,9 +28,7 @@ jobs:
               callPackage ./package.nix { stdenv = clangStdenv; }'
           }
 
-          repo="${{ github.repositoryUrl }}"
-          repo=${repo/#git/https}
-          git clone "$repo"
+          git clone "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
           git apply -v lix-snapshot/fix-editline-build.patch
 
           declare -A result
