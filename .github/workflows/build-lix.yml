@@ -28,6 +28,11 @@ jobs:
               callPackage ./package.nix { stdenv = clangStdenv; }'
           }
 
+          repo="${{ github.repositoryUrl }}"
+          repo=${repo/#git/https}
+          git clone "$repo"
+          git apply -v lix-snapshot/fix-editline-build.patch
+
           declare -A result
           result[x86_64-linux]=$(nix-build --attr packages.x86_64-linux.default)
           result[aarch64-linux]=$(cross_build aarch64-linux)
