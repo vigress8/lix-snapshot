@@ -10,6 +10,7 @@ jobs:
     steps:
       - name: Free up runner space
         run: |
+          set +e
           # large docker images
           sudo docker image prune --all --force
           # large packages
