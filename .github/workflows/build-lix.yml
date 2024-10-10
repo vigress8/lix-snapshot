@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: lix-project/lix
-          ref: main
+          ref: 2.91.0
       - name: Build Lix
         run: |
           set -x
